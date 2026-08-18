@@ -2,8 +2,25 @@
 layout: default
 ---
 <article class="post">
-  <h1>{{ page.title }}</h1>
-  <p class="meta"><time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time></p>
-  {{ content }}
+  <header class="post-header">
+    <p class="eyebrow mono">
+      <a href="{{ '/' | relative_url }}">← writing</a>
+      <span class="sep">/</span>
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
+      <span class="sep">/</span>
+      {% assign words = content | number_of_words %}{{ words | divided_by: 210 | plus: 1 }} min read
+    </p>
+    <h1 class="post-title-main">{{ page.title }}</h1>
+    {% if page.subtitle %}<p class="post-subtitle">{{ page.subtitle }}</p>{% endif %}
+  </header>
+  <div class="prose">
+    {{ content }}
+  </div>
+  <footer class="post-footer">
+    <div class="sig">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span><strong>{{ site.author }}</strong><br><span class="dim">{{ site.description }}</span></span>
+    </div>
+    <p class="mono"><a href="{{ '/' | relative_url }}">← All writing</a></p>
+  </footer>
 </article>
-<p class="back"><a href="{{ '/' | relative_url }}">← All posts</a></p>

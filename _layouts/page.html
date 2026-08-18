@@ -2,6 +2,11 @@
 layout: default
 ---
 <article class="post">
-  <h1>{{ page.title }}</h1>
-  {{ content }}
+  <header class="post-header">
+    <p class="eyebrow mono"><a href="{{ '/' | relative_url }}">← home</a></p>
+    <h1 class="post-title-main">{{ page.title }}</h1>
+  </header>
+  <div class="prose">
+    {{ content }}
+  </div>
 </article>

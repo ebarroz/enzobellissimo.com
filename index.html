@@ -1,11 +1,29 @@
 ---
 layout: default
 ---
-<ul class="post-list">
-{% for post in site.posts %}
-  <li>
-    <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    <span class="meta">{{ post.date | date: "%b %-d, %Y" }}</span>
-  </li>
-{% endfor %}
-</ul>
+<section class="hero">
+  <p class="eyebrow mono"><span class="pulse" aria-hidden="true"></span> now writing · {{ site.location }}</p>
+  <h1 class="hero-title">{{ site.author }}</h1>
+  <p class="hero-tagline">{{ site.tagline }}</p>
+</section>
+
+<section class="writing">
+  <div class="section-head">
+    <h2 class="mono">Writing</h2>
+    <span class="mono dim">{{ site.posts | size }} {% if site.posts.size == 1 %}essay{% else %}essays{% endif %}</span>
+  </div>
+  <ol class="post-list" reversed>
+  {% for post in site.posts %}
+    <li class="post-item">
+      <a class="post-link" href="{{ post.url | relative_url }}">
+        <span class="post-date mono">{{ post.date | date: "%Y" }}<em>.</em>{{ post.date | date: "%m.%d" }}</span>
+        <span class="post-body">
+          <span class="post-title">{{ post.title }}</span>
+          {% if post.excerpt %}<span class="post-excerpt">{{ post.excerpt | strip_html | truncatewords: 26 }}</span>{% endif %}
+        </span>
+        <span class="post-arrow" aria-hidden="true">→</span>
+      </a>
+    </li>
+  {% endfor %}
+  </ol>
+</section>
