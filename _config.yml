@@ -1,0 +1,15 @@
+title: Enzo Bellissimo
+description: Notes on AI, automation, and building an agency.
+url: "https://enzobellissimo.com"
+baseurl: ""
+author: Enzo Bellissimo
+lang: en
+permalink: /:title/
+markdown: kramdown
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+feed:
+  path: feed.xml
+exclude:
+  - README.md
