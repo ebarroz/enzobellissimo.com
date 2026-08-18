@@ -13,4 +13,4 @@ title: My post title
 Body in Markdown.
 ```
 
-Commit + push (or edit on github.com) → live at https://enzobellissimo.com/slug/ in ~1 minute.
+Commit + push (or edit on github.com) → live at https://blog.enzobellissimo.com/slug/ in ~1 minute.
