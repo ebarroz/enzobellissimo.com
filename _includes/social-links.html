@@ -16,4 +16,12 @@
     </a>
   </li>
   {%- endfor %}
+  {%- if include.feed %}
+  <li>
+    <a class="social-link" href="{{ '/feed.xml' | relative_url }}" title="RSS feed">
+      <svg class="social-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><path fill="currentColor" d="M2 0a14 14 0 0 1 14 14h-2.5A11.5 11.5 0 0 0 2 2.5V0Zm0 5.5A8.5 8.5 0 0 1 10.5 14H8A6 6 0 0 0 2 8V5.5ZM3.6 10.8a1.9 1.9 0 1 1 0 3.8 1.9 1.9 0 0 1 0-3.8Z"/></svg>
+      <span class="social-name">RSS</span>
+    </a>
+  </li>
+  {%- endif %}
 </ul>

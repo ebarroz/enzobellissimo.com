@@ -40,18 +40,21 @@ layout: default
   {%- comment -%} Internal links: keeps crawlers moving through the archive. {%- endcomment -%}
   {%- if page.previous or page.next %}
   <nav class="post-nav" aria-label="More essays">
-    {%- if page.previous %}
-    <a class="post-nav-item" href="{{ page.previous.url | relative_url }}" rel="prev">
-      <span class="mono dim">← Previous</span>
-      <span class="post-nav-title">{{ page.previous.title }}</span>
-    </a>
-    {%- endif %}
-    {%- if page.next %}
-    <a class="post-nav-item next" href="{{ page.next.url | relative_url }}" rel="next">
-      <span class="mono dim">Next →</span>
-      <span class="post-nav-title">{{ page.next.title }}</span>
-    </a>
-    {%- endif %}
+    <p class="post-nav-label mono dim">Keep reading</p>
+    <div class="post-nav-grid">
+      {%- if page.next %}
+      <a class="post-nav-item prev" href="{{ page.next.url | relative_url }}" rel="prev">
+        <span class="post-nav-dir mono"><span class="post-nav-arrow">&#8592;</span> Newer</span>
+        <span class="post-nav-title">{{ page.next.title }}</span>
+      </a>
+      {%- endif %}
+      {%- if page.previous %}
+      <a class="post-nav-item next" href="{{ page.previous.url | relative_url }}" rel="next">
+        <span class="post-nav-dir mono">Older <span class="post-nav-arrow">&#8594;</span></span>
+        <span class="post-nav-title">{{ page.previous.title }}</span>
+      </a>
+      {%- endif %}
+    </div>
   </nav>
   {%- endif %}
 </article>

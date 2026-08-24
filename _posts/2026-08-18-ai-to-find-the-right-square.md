@@ -1,6 +1,7 @@
 ---
 layout: post
 title: AI to Find the Right Square
+date: 2026-08-18 13:54:02 -0300
 subtitle: Stop asking AI to solve your problem. Ask it whether you picked the right problem.
 description: >-
   Most people use AI to solve a problem they already picked. The real leverage

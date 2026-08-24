@@ -44,9 +44,11 @@
 {{ content }}
 </main>
 <footer class="site-footer">
-  <span class="mono">© {{ 'now' | date: "%Y" }} {{ site.author.name }}</span>
-  {% include social-links.html %}
-  <span class="mono dim">{{ site.location }} · <a href="{{ '/feed.xml' | relative_url }}">feed</a></span>
+  <div class="foot-id">
+    <span class="mono">© {{ 'now' | date: "%Y" }} {{ site.author.name }}</span>
+    <span class="mono dim">{{ site.location }}</span>
+  </div>
+  {% include social-links.html feed=true %}
 </footer>
 </div>
 </body>

@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Hello, world
+date: 2026-08-18 13:26:42 -0300
 description: >-
   The first post: why this blog exists, and what I'll be writing about here —
   AI, automation, and what it's like to build an agency around them.
