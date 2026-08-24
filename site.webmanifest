@@ -1,0 +1,23 @@
+---
+permalink: /site.webmanifest
+sitemap: false
+---
+{
+  "name": {{ site.title | jsonify }},
+  "short_name": "Enzo B.",
+  "description": {{ site.description | normalize_whitespace | strip | jsonify }},
+  "lang": {{ site.lang | jsonify }},
+  "start_url": "/",
+  "scope": "/",
+  "display": "minimal-ui",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f1e8",
+  "theme_color": "#f5f1e8",
+  "categories": ["news", "education", "technology"],
+  "icons": [
+    { "src": "/assets/favicon-32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/assets/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/assets/logo-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/logo.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

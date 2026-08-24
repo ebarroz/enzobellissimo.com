@@ -1,6 +1,18 @@
 ---
 layout: post
 title: AI to Find the Right Square
+subtitle: Stop asking AI to solve your problem. Ask it whether you picked the right problem.
+description: >-
+  Most people use AI to solve a problem they already picked. The real leverage
+  is asking whether it was the right problem at all — and how to prompt for that.
+category: Essays
+tags:
+  - artificial intelligence
+  - problem framing
+  - mental models
+  - prompting
+image: /assets/og-ai-to-find-the-right-square.png
+image_alt: "AI to Find the Right Square — an essay by Enzo Barros Bellissimo"
 ---
 
 I’ve been using AI for the last four years, and something hit me.

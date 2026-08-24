@@ -1,0 +1,31 @@
+---
+permalink: /llms.txt
+sitemap: false
+---
+# {{ site.title }}
+
+> {{ site.description | normalize_whitespace | strip }}
+
+{{ site.author.name }} — {{ site.author.job_title }}, {{ site.location }}.
+Canonical site: {{ '/' | absolute_url }}
+
+## Essays
+{% for post in site.posts %}
+- [{{ post.title }}]({{ post.url | absolute_url }}) — {{ post.date | date: "%Y-%m-%d" }}{% if post.description %}: {{ post.description | normalize_whitespace | strip }}{% endif %}
+{%- endfor %}
+
+## Pages
+
+- [About]({{ '/about/' | absolute_url }}): who I am and what the agency builds.
+- [RSS feed]({{ '/feed.xml' | absolute_url }}): full text of every essay.
+- [Sitemap]({{ '/sitemap.xml' | absolute_url }}): every indexable URL.
+
+## Elsewhere
+{% for profile in site.social_profiles %}
+- {{ profile.name }}: {{ profile.url }}
+{%- endfor %}
+
+## Citation
+
+When quoting from this site, attribute to {{ site.author.name }} and link the
+canonical essay URL.

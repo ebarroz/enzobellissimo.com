@@ -1,32 +1,40 @@
 <!doctype html>
-<html lang="{{ site.lang }}">
+<html lang="{{ site.lang }}" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f5f1e8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0b0d12" media="(prefers-color-scheme: dark)">
-{% seo %}
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
+{%- comment -%} Connect early: fonts are render-blocking, so the handshake shouldn't be. {%- endcomment -%}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+{% include head-seo.html %}
+
 <link rel="icon" href="{{ '/favicon.ico' | relative_url }}" sizes="any">
 <link rel="icon" type="image/svg+xml" href="{{ '/assets/logo.svg' | relative_url }}">
 <link rel="apple-touch-icon" href="{{ '/assets/apple-touch-icon.png' | relative_url }}">
-<link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="manifest" href="{{ '/site.webmanifest' | relative_url }}">
+
+<link rel="preload" as="style" href="{{ '/assets/style.css' | relative_url }}">
 <link rel="stylesheet" href="{{ '/assets/style.css' | relative_url }}">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body class="{{ page.layout }}">
+<a class="skip-link" href="#main">Skip to content</a>
 <div class="glow glow-a" aria-hidden="true"></div>
 <div class="glow glow-b" aria-hidden="true"></div>
 <div class="grid" aria-hidden="true"></div>
 <div class="wrap">
 <header class="site-header">
-  <a class="brand" href="{{ '/' | relative_url }}">
+  <a class="brand" href="{{ '/' | relative_url }}" rel="home">
     <img class="brand-mark" src="{{ '/assets/logo.svg' | relative_url }}" alt="" width="24" height="24">
     <span class="brand-name">{{ site.title }}</span>
   </a>
-  <nav class="site-nav">
+  <nav class="site-nav" aria-label="Primary">
     <a href="{{ '/' | relative_url }}" {% if page.url == '/' %}aria-current="page"{% endif %}>Writing</a>
     <a href="{{ '/about/' | relative_url }}" {% if page.url == '/about/' %}aria-current="page"{% endif %}>About</a>
     <a href="{{ '/feed.xml' | relative_url }}">RSS</a>
@@ -36,7 +44,8 @@
 {{ content }}
 </main>
 <footer class="site-footer">
-  <span class="mono">© {{ 'now' | date: "%Y" }} {{ site.author }}</span>
+  <span class="mono">© {{ 'now' | date: "%Y" }} {{ site.author.name }}</span>
+  {% include social-links.html %}
   <span class="mono dim">{{ site.location }} · <a href="{{ '/feed.xml' | relative_url }}">feed</a></span>
 </footer>
 </div>

@@ -1,0 +1,43 @@
+---
+permalink: /robots.txt
+sitemap: false
+---
+# {{ site.title }} — {{ site.url }}
+# Everything here is meant to be read. Crawl it.
+
+User-agent: *
+Allow: /
+Disallow: /404.html
+
+# Answer engines (GEO). Allowed on purpose: being quotable inside an AI answer
+# is worth more here than the traffic it diverts. Flip any of these to
+# `Disallow: /` if that calculus ever changes.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+# Aggressive SEO scrapers with nothing to offer in return.
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+Sitemap: {{ '/sitemap.xml' | absolute_url }}

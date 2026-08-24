@@ -1,18 +1,94 @@
+# ---------------------------------------------------------------------------
+# Site identity
+# ---------------------------------------------------------------------------
 title: Enzo Barros Bellissimo
-description: Essays and notes on AI, automation, and building things that work while you sleep.
+headline: Essays on AI, Automation & Voice Agents
+tagline: A quiet place to read about AI, automation, and the craft of building an agency.
+description: >-
+  Essays and notes by Enzo Barros Bellissimo on AI, automation, and voice
+  agents — building systems that qualify leads and book meetings while you sleep.
 url: "https://blog.enzobellissimo.com"
 baseurl: ""
-author: Enzo Barros Bellissimo
 lang: en
-permalink: /:title/
+locale: en_US
+timezone: America/Sao_Paulo
+location: São Paulo, Brazil
+
+# ---------------------------------------------------------------------------
+# Author / identity graph (feeds JSON-LD `sameAs`, rel="me", and the footer)
+# ---------------------------------------------------------------------------
+author:
+  name: Enzo Barros Bellissimo
+  first_name: Enzo
+  last_name: Bellissimo
+  job_title: Founder, AI automation agency
+  url: "https://blog.enzobellissimo.com/about/"
+
+social:
+  name: Enzo Barros Bellissimo
+  links:
+    - https://github.com/ebarroz
+    - https://www.linkedin.com/in/enzobbellissimo/
+
+# Rendered as icon links in the footer + as rel="me" in <head>.
+social_profiles:
+  - name: GitHub
+    handle: ebarroz
+    url: https://github.com/ebarroz
+    icon: github
+  - name: LinkedIn
+    handle: enzobbellissimo
+    url: https://www.linkedin.com/in/enzobbellissimo/
+    icon: linkedin
+
+# ---------------------------------------------------------------------------
+# Branding assets used by the SEO head
+# ---------------------------------------------------------------------------
+logo: /assets/logo-512.png
+og_image: /assets/og-default.png
+og_image_width: 1200
+og_image_height: 630
+title_separator: "·"
+
+# Paste the token from Google Search Console / Bing Webmaster Tools here and the
+# verification <meta> appears site-wide. Left blank = tag omitted entirely.
+google_site_verification:
+bing_site_verification:
+
+# ---------------------------------------------------------------------------
+# Build
+# ---------------------------------------------------------------------------
 markdown: kramdown
+permalink: /:title/
+excerpt_separator: "\n\n"
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  auto_ids: true
+  toc_levels: 2..3
+  smart_quotes: ["lsquo", "rsquo", "ldquo", "rdquo"]
+
 plugins:
   - jekyll-feed
-  - jekyll-seo-tag
+  - jekyll-sitemap
+
 feed:
   path: feed.xml
+
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: post
+      author: Enzo Barros Bellissimo
+
 exclude:
   - README.md
-tagline: A quiet place to read about AI, automation, and the craft of building an agency.
-location: São Paulo, Brazil
-logo: /assets/logo-512.png
+  - tools/
+  - .claude/
+
+# CNAME must reach _site/ for the custom domain, so it is never excluded.
+include:
+  - .well-known
