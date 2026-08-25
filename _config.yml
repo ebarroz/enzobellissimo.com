@@ -21,8 +21,17 @@ author:
   name: Enzo Barros Bellissimo
   first_name: Enzo
   last_name: Bellissimo
-  job_title: Founder, AI automation agency
+  job_title: Founder, Similar Info — custom software & AI agents
   url: "https://blog.enzobellissimo.com/about/"
+
+# Company (feeds the footer, About, and the JSON-LD Person → worksFor)
+company:
+  name: Similar Info
+  legal_name: Similar Tecnologia e Inteligência Artificial Ltda
+  url: https://similarinfo.com/?utm_source=blog&utm_medium=referral
+  canonical_url: https://similarinfo.com/
+  instagram: https://www.instagram.com/smartsimilar/
+  location: Alphaville, Barueri, SP — Brazil
 
 social:
   name: Enzo Barros Bellissimo
@@ -40,6 +49,18 @@ social_profiles:
     handle: enzobbellissimo
     url: https://www.linkedin.com/in/enzobbellissimo/
     icon: linkedin
+  # scope: company → rendered in the footer, but NOT rel="me" / Person.sameAs
+  # (those assert "same human"; the company lives in Organization.sameAs).
+  - name: Similar Info
+    handle: similarinfo.com
+    url: https://similarinfo.com/?utm_source=blog&utm_medium=referral
+    icon: globe
+    scope: company
+  - name: Instagram
+    handle: smartsimilar
+    url: https://www.instagram.com/smartsimilar/
+    icon: instagram
+    scope: company
 
 # ---------------------------------------------------------------------------
 # Branding assets used by the SEO head

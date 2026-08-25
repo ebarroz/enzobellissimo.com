@@ -96,9 +96,9 @@
 {%- endif %}
 
 {%- comment -%} ---------- identity: rel="me" verifies the same human owns these ---------- {%- endcomment -%}
-{%- for profile in site.social_profiles %}
+{%- for profile in site.social_profiles %}{%- unless profile.scope == "company" %}
 <link rel="me" href="{{ profile.url }}">
-{%- endfor %}
+{%- endunless %}{%- endfor %}
 
 {%- comment -%} ---------- Open Graph ---------- {%- endcomment -%}
 <meta property="og:type" content="{{ seo_type }}">
@@ -176,8 +176,20 @@
       },
       "knowsAbout": ["Artificial Intelligence", "Automation", "Voice Agents", "Large Language Models", "Lead Qualification", "Agency Operations"],
       "knowsLanguage": ["en", "pt-BR"],
+      {%- if site.company %}
+      "worksFor": {
+        "@type": "Organization",
+        "@id": {{ site.company.canonical_url | append: "#organization" | jsonify }},
+        "name": {{ site.company.name | jsonify }},
+        "legalName": {{ site.company.legal_name | jsonify }},
+        "url": {{ site.company.canonical_url | jsonify }},
+        "founder": { "@id": {{ "/#person" | absolute_url | jsonify }} },
+        "sameAs": [ {{ site.company.instagram | jsonify }} ]
+      },
+      {%- endif %}
+      {%- assign personal = site.social_profiles | where_exp: "p", "p.scope != 'company'" %}
       "sameAs": [
-        {%- for profile in site.social_profiles -%}
+        {%- for profile in personal -%}
         {{ profile.url | jsonify }}{% unless forloop.last %},{% endunless %}
         {%- endfor -%}
       ]
