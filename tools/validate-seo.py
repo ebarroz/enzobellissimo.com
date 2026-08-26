@@ -24,7 +24,7 @@ def check(cond, m):
     (ok if cond else fail)(m)
 
 pages = sorted(glob.glob(f"{ROOT}/**/*.html", recursive=True))
-check(len(pages) == 5, f"5 HTML pages built (got {len(pages)})")
+check(len(pages) == 6, f"6 HTML pages built (got {len(pages)})")
 
 # ---------------------------------------------------------------- per page
 for f in pages:
@@ -45,11 +45,11 @@ for f in pages:
     one(r'<meta name="twitter:card" content="(.*?)">', "twitter:card")
 
     if title:
-        n = len(re.sub(r"&\w+;", "x", title))
+        n = len(re.sub(r"&(#\d+|#x[0-9A-Fa-f]+|\w+);", "x", title))
         check(n <= 65, f"{rel}: title {n} chars (<=65)")
-        check("&amp;" in title or "&" not in title, f"{rel}: title has no raw ampersand")
+        check(not re.search(r"&(?!(?:#\d+|#x[0-9A-Fa-f]+|\w+);)", title), f"{rel}: title has no raw ampersand")
     if desc:
-        n = len(re.sub(r"&\w+;", "x", desc))
+        n = len(re.sub(r"&(#\d+|#x[0-9A-Fa-f]+|\w+);", "x", desc))
         if "noindex" in h:
             ok(f"{rel}: description length not scored (noindex)")
         else:
@@ -140,7 +140,7 @@ for f in pages:
 sm = ET.parse(f"{ROOT}/sitemap.xml").getroot()
 ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 locs = [l.text for l in sm.findall(".//s:loc", ns)]
-check(len(locs) == 4, f"sitemap: 4 URLs (got {len(locs)})")
+check(len(locs) == 5, f"sitemap: 5 URLs (got {len(locs)})")
 check(all(l.startswith(SITE) for l in locs), "sitemap: all URLs absolute")
 check(not any("404" in l for l in locs), "sitemap: 404 excluded")
 check(len(locs) == len(set(locs)), "sitemap: no duplicate URLs")
@@ -153,7 +153,7 @@ check(canons == set(locs), f"sitemap matches canonicals (diff: {canons ^ set(loc
 feed = ET.parse(f"{ROOT}/feed.xml").getroot()
 atom = "{http://www.w3.org/2005/Atom}"
 entries = feed.findall(f"{atom}entry")
-check(len(entries) == 2, f"feed: 2 entries (got {len(entries)})")
+check(len(entries) == 3, f"feed: 3 entries (got {len(entries)})")
 check(feed.find(f"{atom}title") is not None, "feed: has title")
 check(all(e.find(f"{atom}content") is not None for e in entries), "feed: full-text content")
 
