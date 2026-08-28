@@ -6,8 +6,15 @@ description: That page doesn't exist. Head back to the reading room for essays o
 noindex: true
 sitemap: false
 ---
+{%- comment -%}
+  One 404 serves both trees — GitHub Pages has no per-directory fallback —
+  so it answers in both languages rather than guessing wrong.
+{%- endcomment -%}
+{%- assign en = site.data.i18n.en -%}
+{%- assign pt = site.data.i18n["pt-BR"] -%}
 <section class="hero">
-  <p class="eyebrow mono">404 · signal lost</p>
-  <h1 class="hero-title">Nothing here.</h1>
-  <p class="hero-tagline">The page you're looking for doesn't exist. <a href="/">Back to the reading room →</a></p>
+  <p class="eyebrow mono">{{ en.notfound_eyebrow }}</p>
+  <h1 class="hero-title">{{ en.notfound_title }}</h1>
+  <p class="hero-tagline">{{ en.notfound_body }} <a href="{{ en.home | relative_url }}">{{ en.notfound_link }} →</a></p>
+  <p class="hero-tagline dim" lang="pt-BR">{{ pt.notfound_body }} <a href="{{ pt.home | relative_url }}">{{ pt.notfound_link }} →</a></p>
 </section>

@@ -1,0 +1,52 @@
+---
+---
+{%- include i18n.html -%}
+{%- comment -%}
+  ===========================================================================
+  feed.xml — one Atom feed per language.
+
+  This replaces jekyll-feed. Its per-collection feeds inherit `site.lang`,
+  `site.description` and the root URL, so the Portuguese feed came out
+  labelled xml:lang="en", subtitled in English, titled "… | Pt_posts" and
+  pointing its alternate link at the English home. None of that is
+  configurable per collection, and all four are things a feed reader shows.
+
+  `<updated>` is the newest post's date, never the build clock — same rule
+  the rest of the site follows. A rebuild is not a publication.
+  ===========================================================================
+{%- endcomment -%}
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="{{ lang }}">
+  <title type="text">{{ site.title | append: " — " | append: t.headline | escape }}</title>
+  <subtitle>{{ t.description | normalize_whitespace | strip | escape }}</subtitle>
+  <id>{{ t.feed | absolute_url }}</id>
+  <link rel="self" type="application/atom+xml" href="{{ t.feed | absolute_url }}"/>
+  <link rel="alternate" type="text/html" hreflang="{{ lang }}" href="{{ t.home | absolute_url }}"/>
+  {%- for code in site.languages %}{%- unless code == lang %}
+  <link rel="alternate" type="application/atom+xml" hreflang="{{ code }}" href="{{ site.data.i18n[code].feed | absolute_url }}"/>
+  {%- endunless %}{%- endfor %}
+  <updated>{{ lang_posts.first.date | date_to_xmlschema }}</updated>
+  <rights>© {{ lang_posts.first.date | date: "%Y" }} {{ site.author.name | escape }}</rights>
+  <icon>{{ site.logo | absolute_url }}</icon>
+  <author>
+    <name>{{ site.author.name | escape }}</name>
+    <uri>{{ t.about | absolute_url }}</uri>
+  </author>
+  {%- for post in lang_posts %}
+  <entry xml:lang="{{ lang }}">
+    <title type="html">{{ post.title | escape }}</title>
+    <id>{{ post.url | absolute_url }}</id>
+    <link rel="alternate" type="text/html" href="{{ post.url | absolute_url }}"/>
+    <published>{{ post.date | date_to_xmlschema }}</published>
+    <updated>{{ post.last_modified_at | default: post.date | date_to_xmlschema }}</updated>
+    <author><name>{{ site.author.name | escape }}</name></author>
+    {%- if post.description %}
+    <summary type="html">{{ post.description | normalize_whitespace | strip | escape }}</summary>
+    {%- endif %}
+    {%- for tag in post.tags %}
+    <category term="{{ tag | escape }}"/>
+    {%- endfor %}
+    <content type="html" xml:base="{{ post.url | absolute_url }}"><![CDATA[{{ post.content }}]]></content>
+  </entry>
+  {%- endfor %}
+</feed>

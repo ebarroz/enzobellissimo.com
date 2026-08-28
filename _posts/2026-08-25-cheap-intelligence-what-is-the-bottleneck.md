@@ -1,5 +1,6 @@
 ---
 layout: post
+ref: cheap-intelligence
 title: What Cheap Intelligence Won't Fix
 date: 2026-08-25 08:00:00 -0300
 subtitle: Intelligence is getting cheaper. Coordinating people who want different futures is not.

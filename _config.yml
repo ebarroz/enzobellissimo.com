@@ -9,9 +9,28 @@ description: >-
   agents — building systems that qualify leads and book meetings while you sleep.
 url: "https://blog.enzobellissimo.com"
 baseurl: ""
-lang: en
-locale: en_US
 timezone: America/Sao_Paulo
+
+# ---------------------------------------------------------------------------
+# Languages
+#
+# `lang` is the default (the one that owns the root URLs and x-default).
+# Every tag below is simultaneously: the key into `_data/i18n.yml`, the
+# `<html lang>` value, and the `hreflang` value — one string, three jobs.
+#
+# English lives at  /            and is written in  _posts/
+# Portuguese lives at /pt/       and is written in  _pt_posts/
+#
+# Adding a third language = a block in _data/i18n.yml + a collection here +
+# a home page. Nothing in the layouts is hard-coded to two.
+# ---------------------------------------------------------------------------
+lang: en
+languages:
+  - en
+  - pt-BR
+
+# Kept for compatibility with anything reading the old flat keys.
+locale: en_US
 location: São Paulo, Brazil
 
 # ---------------------------------------------------------------------------
@@ -81,6 +100,14 @@ bing_site_verification:
 # ---------------------------------------------------------------------------
 markdown: kramdown
 permalink: /:title/
+
+# Portuguese posts are a collection rather than a second _posts folder: it
+# keeps `site.posts` monolingual, so the English home page, feed and
+# prev/next need no language filtering at all.
+collections:
+  pt_posts:
+    output: true
+    permalink: /pt/:title/
 excerpt_separator: "\n\n"
 
 kramdown:
@@ -91,19 +118,33 @@ kramdown:
   smart_quotes: ["lsquo", "rsquo", "ldquo", "rdquo"]
 
 plugins:
-  - jekyll-feed
   - jekyll-sitemap
 
-feed:
-  path: feed.xml
-
 defaults:
+  # Pages default to the site language; the /pt/ ones override below.
+  - scope:
+      path: ""
+    values:
+      lang: en
+  - scope:
+      path: "pt"
+    values:
+      lang: pt-BR
   - scope:
       path: ""
       type: posts
     values:
       layout: post
       author: Enzo Barros Bellissimo
+      lang: en
+  - scope:
+      path: ""
+      type: pt_posts
+    values:
+      layout: post
+      author: Enzo Barros Bellissimo
+      lang: pt-BR
+      category: Ensaios
 
 exclude:
   - README.md

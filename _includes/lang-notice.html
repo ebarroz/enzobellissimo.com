@@ -1,0 +1,30 @@
+{%- comment -%}
+  ===========================================================================
+  lang-notice.html — "Leia em português →" above the content, whenever this
+  page has a counterpart.
+
+  The header pill shows that a choice exists; this shows what the choice
+  *is*, in words, to the person who needs it. It is deliberately written in
+  the target language: a Brazilian reader who lands on an English essay from
+  a search result should see Portuguese, not an English sentence about
+  Portuguese.
+
+  Static markup, no language sniffing: it renders the same for every visitor
+  and for crawlers, and adds one more internal link between the two trees.
+  ===========================================================================
+{%- endcomment -%}
+{%- if page.ref -%}
+{%- for code in site.languages -%}
+{%- unless code == lang -%}
+{%- assign l = site.data.i18n[code] -%}
+{%- assign twin = all_docs | where: "ref", page.ref | where: "lang", code | first -%}
+{%- if twin -%}
+<a class="lang-notice" href="{{ twin.url | relative_url }}" lang="{{ code }}" hreflang="{{ code }}">
+  <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" d="M8 1.2a6.8 6.8 0 1 0 0 13.6A6.8 6.8 0 0 0 8 1.2Zm0 0c-2 2-3 4.3-3 6.8s1 4.8 3 6.8m0-13.6c2 2 3 4.3 3 6.8s-1 4.8-3 6.8M1.4 8h13.2"/></svg>
+  <span>{{ l.read_in_lang }}</span>
+  <span class="lang-notice-arrow" aria-hidden="true">→</span>
+</a>
+{%- endif -%}
+{%- endunless -%}
+{%- endfor -%}
+{%- endif -%}

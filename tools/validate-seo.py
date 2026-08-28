@@ -4,9 +4,11 @@
     jekyll build && python3 tools/validate-seo.py
 
 Checks title/description lengths, canonical + robots + OG/Twitter completeness,
-JSON-LD parseability and @id integrity, sitemap/canonical agreement, feed,
+JSON-LD parseability and @id integrity, sitemap/canonical agreement, feeds,
 robots.txt directives, manifest icons, llms.txt, internal link resolution,
-social-card dimensions, and that no page is stamped with the build clock.
+social-card dimensions, that no page is stamped with the build clock, and the
+whole i18n layer: <html lang>, og:locale, schema inLanguage, and reciprocal
+hreflang clusters that never advertise a URL the build did not produce.
 """
 import json, os, re, sys, glob
 from urllib.parse import urlparse
@@ -23,8 +25,27 @@ def warn(m): warns.append(m)
 def check(cond, m):
     (ok if cond else fail)(m)
 
+# Every language, and the URL prefix that owns it. Mirrors `languages` +
+# the collection permalinks in _config.yml.
+LANGS = {"en": "", "pt-BR": "pt"}
+DEFAULT_LANG = "en"
+LOCALES = {"en": "en_US", "pt-BR": "pt_BR"}
+
+def lang_of(rel):
+    """Which language a built path belongs to, from its position in the tree."""
+    top = rel.split("/")[0]
+    for code, prefix in LANGS.items():
+        if prefix and top == prefix:
+            return code
+    return DEFAULT_LANG
+
 pages = sorted(glob.glob(f"{ROOT}/**/*.html", recursive=True))
-check(len(pages) == 6, f"6 HTML pages built (got {len(pages)})")
+check(len(pages) == 11, f"11 HTML pages built (got {len(pages)})")
+# Both languages actually produced pages — a broken collection would other-
+# wise pass every per-page check below by simply having nothing to check.
+for code, prefix in LANGS.items():
+    n = sum(1 for f in pages if lang_of(os.path.relpath(f, ROOT)) == code)
+    check(n >= 4, f"{code}: at least 4 pages built (got {n})")
 
 # ---------------------------------------------------------------- per page
 for f in pages:
@@ -64,8 +85,16 @@ for f in pages:
 
     # exactly one h1
     check(len(re.findall(r"<h1[ >]", h)) == 1, f"{rel}: exactly one <h1>")
-    # lang
-    check('<html lang="en"' in h, f"{rel}: html lang set")
+    # lang: <html lang>, og:locale and schema inLanguage must agree with
+    # the tree the page was built into. A page in the wrong language is
+    # worse than an untranslated one — Google demotes the whole cluster.
+    want = lang_of(rel)
+    check(f'<html lang="{want}"' in h, f"{rel}: html lang is {want}")
+    check(f'<meta property="og:locale" content="{LOCALES[want]}">' in h,
+          f"{rel}: og:locale is {LOCALES[want]}")
+    alts = re.findall(r'<meta property="og:locale:alternate" content="(.*?)">', h)
+    check(sorted(alts) == sorted(v for k, v in LOCALES.items() if k != want),
+          f"{rel}: og:locale:alternate lists the other languages")
     # rel=me both profiles
     check(h.count('rel="me"') >= 2, f"{rel}: rel=me for both profiles")
     # no unrendered liquid
@@ -140,7 +169,10 @@ for f in pages:
 sm = ET.parse(f"{ROOT}/sitemap.xml").getroot()
 ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 locs = [l.text for l in sm.findall(".//s:loc", ns)]
-check(len(locs) == 5, f"sitemap: 5 URLs (got {len(locs)})")
+check(len(locs) == 10, f"sitemap: 10 URLs (got {len(locs)})")
+for code, prefix in LANGS.items():
+    n = sum(1 for l in locs if lang_of(l[len(SITE):].lstrip("/")) == code)
+    check(n == 5, f"sitemap: 5 URLs for {code} (got {n})")
 check(all(l.startswith(SITE) for l in locs), "sitemap: all URLs absolute")
 check(not any("404" in l for l in locs), "sitemap: 404 excluded")
 check(len(locs) == len(set(locs)), "sitemap: no duplicate URLs")
@@ -149,13 +181,36 @@ canons = {re.search(r'rel="canonical" href="(.*?)"', open(p, encoding="utf-8").r
           for p in pages if not p.endswith("404.html")}
 check(canons == set(locs), f"sitemap matches canonicals (diff: {canons ^ set(locs)})")
 
-# ---------------------------------------------------------------- feed
-feed = ET.parse(f"{ROOT}/feed.xml").getroot()
+# ---------------------------------------------------------------- feeds
+# One feed per language, and no language leaks into the other: an English
+# subscriber must never be handed a Portuguese post, and vice versa.
 atom = "{http://www.w3.org/2005/Atom}"
-entries = feed.findall(f"{atom}entry")
-check(len(entries) == 3, f"feed: 3 entries (got {len(entries)})")
-check(feed.find(f"{atom}title") is not None, "feed: has title")
-check(all(e.find(f"{atom}content") is not None for e in entries), "feed: full-text content")
+FEEDS = {"en": "feed.xml", "pt-BR": "pt/feed.xml"}
+XMLLANG = "{http://www.w3.org/XML/1998/namespace}lang"
+for code, path in FEEDS.items():
+    check(os.path.exists(f"{ROOT}/{path}"), f"feed: {path} exists")
+    feed = ET.parse(f"{ROOT}/{path}").getroot()   # also asserts well-formedness
+    entries = feed.findall(f"{atom}entry")
+    check(len(entries) == 3, f"{path}: 3 entries (got {len(entries)})")
+    # Atom requires all of these at feed level; readers degrade badly without them.
+    for tag in ("title", "id", "updated", "author", "subtitle"):
+        check(feed.find(f"{atom}{tag}") is not None, f"{path}: feed has <{tag}>")
+    check(feed.get(XMLLANG) == code, f"{path}: feed xml:lang is {code}")
+    rels = {l.get("rel"): l.get("href") for l in feed.findall(f"{atom}link")}
+    check(rels.get("self") == f"{SITE}/{path}", f"{path}: link rel=self is itself")
+    check(rels.get("alternate", "").startswith(SITE), f"{path}: link rel=alternate absolute")
+    # The feed's own <updated> must be the newest post, not the build clock:
+    # a rebuild is not a publication and must not resurface old entries.
+    feed_updated = feed.find(f"{atom}updated").text
+    newest = max(e.find(f"{atom}updated").text for e in entries)
+    check(feed_updated == newest, f"{path}: feed <updated> tracks the newest post")
+    for e in entries:
+        for tag in ("title", "id", "published", "updated", "content"):
+            check(e.find(f"{atom}{tag}") is not None, f"{path}: entry has <{tag}>")
+        check(e.get(XMLLANG) == code, f"{path}: entry xml:lang is {code}")
+        link = e.find(f"{atom}link").get("href")
+        got = lang_of(link[len(SITE):].lstrip("/"))
+        check(got == code, f"{path}: entry {link} is {code} (got {got})")
 
 # ---------------------------------------------------------------- robots
 rb = open(f"{ROOT}/robots.txt", encoding="utf-8").read()
@@ -202,6 +257,100 @@ try:
         check((w, hgt) == (1200, 630), f"{os.path.basename(img)}: 1200x630 (got {w}x{hgt})")
 except Exception as e:
     warn(f"png dim check skipped: {e}")
+
+# ---------------------------------------------------------------- hreflang
+# The whole bilingual SEO story rests on this block. A cluster that is not
+# reciprocal, or that names a URL the build did not produce, is worse than
+# no hreflang at all: Google falls back to guessing, and two translations
+# start competing with each other for the same query.
+def url_to_file(u):
+    return os.path.join(ROOT, u[len(SITE):].lstrip("/").rstrip("/") or "index.html") \
+        if u.endswith(".html") else \
+        os.path.join(ROOT, u[len(SITE):].strip("/"), "index.html")
+
+clusters = {}
+for f in pages:
+    if f.endswith("404.html"):
+        continue
+    rel = os.path.relpath(f, ROOT)
+    h = open(f, encoding="utf-8").read()
+    canon = re.search(r'rel="canonical" href="(.*?)"', h).group(1)
+    pairs = re.findall(r'<link rel="alternate" hreflang="(.*?)" href="(.*?)">', h)
+    clusters[canon] = (rel, dict(pairs))
+
+for canon, (rel, cl) in clusters.items():
+    if not cl:
+        warn(f"{rel}: no hreflang cluster (untranslated page)")
+        continue
+    want = lang_of(rel)
+    # self-reference: the page must appear in its own cluster
+    check(cl.get(want) == canon, f"{rel}: hreflang self-reference ({want} -> itself)")
+    # x-default belongs to the default language
+    check(cl.get("x-default") == cl.get(DEFAULT_LANG),
+          f"{rel}: x-default points at the {DEFAULT_LANG} version")
+    # every advertised URL was actually built
+    for code, url in cl.items():
+        check(os.path.exists(url_to_file(url)), f"{rel}: hreflang {code} -> {url} was built")
+    # reciprocity: the twin must advertise the identical cluster
+    for code, url in cl.items():
+        if code == "x-default" or url == canon:
+            continue
+        twin = clusters.get(url)
+        if twin is None:
+            fail(f"{rel}: hreflang {code} -> {url} is not an indexable page")
+            continue
+        check(twin[1] == cl, f"{rel}: cluster is reciprocal with {twin[0]}")
+
+# hreflang is for crawlers. A person needs a control they can see, so every
+# page with a counterpart must expose it twice: the header switcher and the
+# spelled-out notice above the content. The first version of this shipped
+# with only a bare "EN PT" in the nav, which read as navigation and was
+# missed entirely — hence both, and hence this check.
+for canon, (rel, cl) in clusters.items():
+    if not cl:
+        continue
+    h = open(os.path.join(ROOT, rel), encoding="utf-8").read()
+    for code, url in cl.items():
+        if code == "x-default" or url == canon:
+            continue
+        path = url[len(SITE):]
+        check(f'class="lang-opt" href="{path}"' in h,
+              f"{rel}: header switcher links to the {code} version")
+        check(f'class="lang-notice" href="{path}"' in h,
+              f"{rel}: visible notice links to the {code} version")
+        check(re.search(rf'class="lang-notice"[^>]*>\s*<svg.*?</svg>\s*<span>([^<]+)</span>', h, re.S),
+              f"{rel}: notice carries readable text")
+
+# Every language covers the same essays. A gap is legitimate (a translation
+# can lag) but it should be visible, not silent.
+by_lang = {code: set() for code in LANGS}
+for canon, (rel, cl) in clusters.items():
+    by_lang[lang_of(rel)].add(cl.get(DEFAULT_LANG) or canon)
+for code in LANGS:
+    missing = by_lang[DEFAULT_LANG] - by_lang[code]
+    if missing:
+        warn(f"{code}: {len(missing)} page(s) not translated: {sorted(missing)}")
+    else:
+        ok(f"{code}: every page has a translation")
+
+# schema inLanguage must agree with the tree, and a translated article must
+# declare the relationship in both directions.
+for f in pages:
+    rel = os.path.relpath(f, ROOT)
+    h = open(f, encoding="utf-8").read()
+    want = lang_of(rel)
+    d = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', h, re.S).group(1))
+    g = d["@graph"]
+    for node in g:
+        if node.get("@type") in ("Blog", "BlogPosting", "WebPage", "CollectionPage", "ProfilePage"):
+            check(node.get("inLanguage") == want, f"{rel}: {node['@type']}.inLanguage is {want}")
+    art = next((n for n in g if n.get("@type") == "BlogPosting"), None)
+    if art:
+        rel_key = "workTranslation" if want == DEFAULT_LANG else "translationOfWork"
+        twin_url = clusters[art["url"]][1].get("pt-BR" if want == DEFAULT_LANG else DEFAULT_LANG)
+        if twin_url and twin_url != art["url"]:
+            check(art.get(rel_key, {}).get("url") == twin_url,
+                  f"{rel}: BlogPosting.{rel_key} -> {twin_url}")
 
 # ---------------------------------------------------------------- report
 print(f"\n  PASSED: {passes}")

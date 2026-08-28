@@ -1,6 +1,6 @@
 {%- comment -%}
   ===========================================================================
-  head-seo.html — canonical, Open Graph, Twitter, robots, hreflang, rel=me
+  head-seo.html — canonical, hreflang, Open Graph, Twitter, robots, rel=me
   and a single consolidated schema.org @graph.
 
   Replaces jekyll-seo-tag so every signal is explicit and overridable from a
@@ -15,20 +15,29 @@
     tags: [a, b]      article:tag + schema keywords
     category:         article:section
     last_modified_at: dateModified
+    lang:             "en" | "pt-BR" — <html lang>, og:locale, inLanguage
+    ref:              translation key; pairs this page with its counterpart
+                      in the other language and emits the hreflang cluster
+
+  LANGUAGE MODEL. Two URLs saying the same thing in two languages are not
+  duplicate content *if and only if* they point at each other. `ref` is the
+  join key; everything below (hreflang, og:locale:alternate, the schema
+  translationOfWork/workTranslation pair) falls out of it automatically.
   ===========================================================================
 {%- endcomment -%}
+{%- include i18n.html -%}
 
 {%- comment -%} ---------- title ---------- {%- endcomment -%}
 {%- assign sep = site.title_separator | default: "·" -%}
-{%- if page.url == "/" -%}
-  {%- assign seo_title = site.title | append: " — " | append: site.headline -%}
+{%- if page.ref == "home" -%}
+  {%- assign seo_title = site.title | append: " — " | append: t.headline -%}
 {%- elsif page.title -%}
   {%- assign seo_title = page.title | append: " " | append: sep | append: " " | append: site.title -%}
 {%- else -%}
   {%- assign seo_title = site.title -%}
 {%- endif -%}
 {%- comment -%} Cards drop the site-name suffix: og:site_name already carries it. {%- endcomment -%}
-{%- if page.url == "/" -%}
+{%- if page.ref == "home" -%}
   {%- assign social_title = seo_title -%}
 {%- else -%}
   {%- assign social_title = page.title | default: site.title -%}
@@ -40,33 +49,46 @@
 {%- elsif page.excerpt -%}
   {%- assign seo_description = page.excerpt | strip_html | truncate: 200 -%}
 {%- else -%}
-  {%- assign seo_description = site.description -%}
+  {%- assign seo_description = t.description -%}
 {%- endif -%}
 {%- assign seo_description = seo_description | normalize_whitespace | strip -%}
 
 {%- comment -%} ---------- canonical + image ---------- {%- endcomment -%}
 {%- assign seo_url = page.canonical_url | default: page.url | absolute_url -%}
-{%- assign seo_image = page.image | default: site.og_image | absolute_url -%}
+{%- assign seo_image = page.image | default: t.og_image | default: site.og_image | absolute_url -%}
 {%- assign seo_image_alt = page.image_alt | default: seo_title -%}
 {%- assign site_logo = site.logo | absolute_url -%}
 
 {%- comment -%} ---------- type ---------- {%- endcomment -%}
 {%- if page.layout == "post" -%}
   {%- assign seo_type = "article" -%}
-{%- elsif page.url == "/about/" -%}
+{%- elsif page.ref == "about" -%}
   {%- assign seo_type = "profile" -%}
 {%- else -%}
   {%- assign seo_type = "website" -%}
 {%- endif -%}
 
 {%- comment -%} ----------------------------------------------------------------
+  Translations. `twins` holds every language's copy of this page, self
+  included, so the hreflang cluster is reciprocal by construction. The
+  default language owns x-default: it is the version to serve a reader whose
+  language we cannot infer.
+---------------------------------------------------------------- {%- endcomment -%}
+{%- assign twins = "" | split: "" -%}
+{%- if page.ref -%}
+  {%- assign twins = all_docs | where: "ref", page.ref | sort: "lang" -%}
+{%- endif -%}
+{%- assign twin_other = twins | where_exp: "d", "d.lang != lang" | first -%}
+{%- assign twin_default = twins | where: "lang", site.lang | first -%}
+
+{%- comment -%} ----------------------------------------------------------------
   Dates. Never fall back to `site.time`: that is the build clock, and it would
   re-date every page on every deploy — a freshness signal that is simply false.
-  The homepage legitimately tracks the newest post; everything else needs a real
-  date or emits none at all.
+  A home page legitimately tracks its own language's newest post; everything
+  else needs a real date or emits none at all.
 ---------------------------------------------------------------- {%- endcomment -%}
-{%- if page.url == "/" -%}
-  {%- assign page_modified = site.posts.first.date -%}
+{%- if page.ref == "home" -%}
+  {%- assign page_modified = lang_posts.first.date -%}
 {%- else -%}
   {%- assign page_modified = page.last_modified_at | default: page.date -%}
 {%- endif -%}
@@ -85,7 +107,20 @@
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
 {%- endif %}
 <meta name="author" content="{{ site.author.name }}">
-<link rel="author" href="{{ '/about/' | absolute_url }}">
+<link rel="author" href="{{ t.about | absolute_url }}">
+
+{%- comment -%} ----------------------------------------------------------------
+  hreflang. Emitted only when a counterpart actually exists — advertising a
+  translation that 404s is worse than advertising none.
+---------------------------------------------------------------- {%- endcomment -%}
+{%- if twins.size > 1 %}
+{%- for twin in twins %}
+<link rel="alternate" hreflang="{{ twin.lang }}" href="{{ twin.url | absolute_url }}">
+{%- endfor %}
+{%- if twin_default %}
+<link rel="alternate" hreflang="x-default" href="{{ twin_default.url | absolute_url }}">
+{%- endif %}
+{%- endif %}
 
 {%- comment -%} ---------- search console ownership (set the keys in _config.yml) ---------- {%- endcomment -%}
 {%- if site.google_site_verification %}
@@ -106,7 +141,10 @@
 <meta property="og:description" content="{{ seo_description | escape }}">
 <meta property="og:url" content="{{ seo_url }}">
 <meta property="og:site_name" content="{{ site.title }}">
-<meta property="og:locale" content="{{ site.locale }}">
+<meta property="og:locale" content="{{ t.locale }}">
+{%- for code in site.languages %}{%- unless code == lang %}
+<meta property="og:locale:alternate" content="{{ site.data.i18n[code].locale }}">
+{%- endunless %}{%- endfor %}
 <meta property="og:image" content="{{ seo_image }}">
 <meta property="og:image:secure_url" content="{{ seo_image }}">
 <meta property="og:image:type" content="image/png">
@@ -133,21 +171,30 @@
 <meta name="twitter:image" content="{{ seo_image }}">
 <meta name="twitter:image:alt" content="{{ seo_image_alt | escape }}">
 {%- if seo_type == "article" %}
-<meta name="twitter:label1" content="Written by">
+<meta name="twitter:label1" content="{{ t.written_by | default: 'Written by' }}">
 <meta name="twitter:data1" content="{{ site.author.name }}">
-<meta name="twitter:label2" content="Reading time">
+<meta name="twitter:label2" content="{{ t.reading_time | default: 'Reading time' }}">
 <meta name="twitter:data2" content="{{ read_minutes }} min">
 {%- endif %}
 
-{%- comment -%} ---------- discovery ---------- {%- endcomment -%}
-<link rel="alternate" type="application/rss+xml" title="{{ site.title | append: ' — ' | append: site.headline | escape }}" href="{{ '/feed.xml' | absolute_url }}">
+{%- comment -%} ---------- discovery: this language's feed first, the other one labelled ---------- {%- endcomment -%}
+<link rel="alternate" type="application/rss+xml" title="{{ site.title | append: ' — ' | append: t.headline | escape }}" href="{{ t.feed | absolute_url }}">
+{%- for code in site.languages %}{%- unless code == lang %}
+{%- assign other = site.data.i18n[code] %}
+<link rel="alternate" type="application/rss+xml" hreflang="{{ code }}" title="{{ site.title | append: ' — ' | append: other.headline | escape }}" href="{{ other.feed | absolute_url }}">
+{%- endunless %}{%- endfor %}
 <link rel="sitemap" type="application/xml" title="Sitemap" href="{{ '/sitemap.xml' | absolute_url }}">
 
 {%- comment -%} =========================================================================
   schema.org — one @graph, entities cross-referenced by @id so search engines
   resolve Person → Blog → BlogPosting as a single connected identity instead
   of a pile of unrelated nodes.
+
+  One Person and one WebSite are shared across languages (same human, same
+  site); Blog and the page-level nodes are per-language, keyed off `t.home`,
+  so `inLanguage` is never a lie.
 ========================================================================= {%- endcomment -%}
+{%- assign blog_id = t.home | append: "#blog" | absolute_url -%}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -158,7 +205,7 @@
       "name": {{ site.author.name | jsonify }},
       "givenName": {{ site.author.first_name | jsonify }},
       "familyName": {{ site.author.last_name | jsonify }},
-      "url": {{ "/about/" | absolute_url | jsonify }},
+      "url": {{ t.about | absolute_url | jsonify }},
       "image": {
         "@type": "ImageObject",
         "@id": {{ "/#logo" | absolute_url | jsonify }},
@@ -168,14 +215,14 @@
         "height": 512,
         "caption": {{ site.author.name | jsonify }}
       },
-      "jobTitle": {{ site.author.job_title | jsonify }},
-      "description": {{ site.description | normalize_whitespace | strip | jsonify }},
+      "jobTitle": {{ t.job_title | jsonify }},
+      "description": {{ t.description | normalize_whitespace | strip | jsonify }},
       "homeLocation": {
         "@type": "Place",
-        "name": {{ site.location | jsonify }}
+        "name": {{ t.location | jsonify }}
       },
       "knowsAbout": ["Artificial Intelligence", "Automation", "Voice Agents", "Large Language Models", "Lead Qualification", "Agency Operations"],
-      "knowsLanguage": ["en", "pt-BR"],
+      "knowsLanguage": {{ site.languages | jsonify }},
       {%- if site.company %}
       "worksFor": {
         "@type": "Organization",
@@ -199,19 +246,19 @@
       "@id": {{ "/#website" | absolute_url | jsonify }},
       "url": {{ "/" | absolute_url | jsonify }},
       "name": {{ site.title | jsonify }},
-      "alternateName": {{ site.headline | jsonify }},
-      "description": {{ site.description | normalize_whitespace | strip | jsonify }},
-      "inLanguage": {{ site.lang | jsonify }},
+      "alternateName": {{ t.headline | jsonify }},
+      "description": {{ t.description | normalize_whitespace | strip | jsonify }},
+      "inLanguage": {{ site.languages | jsonify }},
       "publisher": { "@id": {{ "/#person" | absolute_url | jsonify }} },
       "copyrightHolder": { "@id": {{ "/#person" | absolute_url | jsonify }} }
     },
     {
       "@type": "Blog",
-      "@id": {{ "/#blog" | absolute_url | jsonify }},
-      "url": {{ "/" | absolute_url | jsonify }},
+      "@id": {{ blog_id | jsonify }},
+      "url": {{ t.home | absolute_url | jsonify }},
       "name": {{ site.title | jsonify }},
-      "description": {{ site.tagline | jsonify }},
-      "inLanguage": {{ site.lang | jsonify }},
+      "description": {{ t.tagline | jsonify }},
+      "inLanguage": {{ lang | jsonify }},
       "isPartOf": { "@id": {{ "/#website" | absolute_url | jsonify }} },
       "author": { "@id": {{ "/#person" | absolute_url | jsonify }} },
       "publisher": { "@id": {{ "/#person" | absolute_url | jsonify }} }
@@ -221,7 +268,7 @@
       "@type": "BlogPosting",
       "@id": {{ seo_url | append: "#article" | jsonify }},
       "mainEntityOfPage": { "@id": {{ seo_url | append: "#webpage" | jsonify }} },
-      "isPartOf": { "@id": {{ "/#blog" | absolute_url | jsonify }} },
+      "isPartOf": { "@id": {{ blog_id | jsonify }} },
       "headline": {{ page.title | truncate: 110 | jsonify }},
       "name": {{ page.title | jsonify }},
       "description": {{ seo_description | jsonify }},
@@ -232,10 +279,23 @@
       "publisher": { "@id": {{ "/#person" | absolute_url | jsonify }} },
       "copyrightHolder": { "@id": {{ "/#person" | absolute_url | jsonify }} },
       "copyrightYear": {{ page.date | date: "%Y" }},
-      "inLanguage": {{ site.lang | jsonify }},
+      "inLanguage": {{ lang | jsonify }},
       "wordCount": {{ word_count }},
       "timeRequired": "PT{{ read_minutes }}M",
       "articleSection": {{ page.category | default: "Essays" | jsonify }},
+      {%- comment -%}
+        Spelled out as a full node, not a bare {"@id"} reference: the twin
+        lives in a different graph, so a reference would dangle.
+      {%- endcomment -%}
+      {%- if twin_other %}
+      {%- if lang == site.lang %}"workTranslation"{% else %}"translationOfWork"{% endif %}: {
+        "@type": "BlogPosting",
+        "@id": {{ twin_other.url | absolute_url | append: "#article" | jsonify }},
+        "url": {{ twin_other.url | absolute_url | jsonify }},
+        "name": {{ twin_other.title | jsonify }},
+        "inLanguage": {{ twin_other.lang | jsonify }}
+      },
+      {%- endif %}
       {%- if page.tags and page.tags != empty %}
       "keywords": [
         {%- for tag in page.tags -%}
@@ -252,13 +312,13 @@
     },
     {%- endif %}
     {
-      "@type": {% if seo_type == "article" %}"WebPage"{% elsif seo_type == "profile" %}"ProfilePage"{% elsif page.url == "/" %}"CollectionPage"{% else %}"WebPage"{% endif %},
+      "@type": {% if seo_type == "article" %}"WebPage"{% elsif seo_type == "profile" %}"ProfilePage"{% elsif page.ref == "home" %}"CollectionPage"{% else %}"WebPage"{% endif %},
       "@id": {{ seo_url | append: "#webpage" | jsonify }},
       "url": {{ seo_url | jsonify }},
       "name": {{ social_title | jsonify }},
       "description": {{ seo_description | jsonify }},
       "isPartOf": { "@id": {{ "/#website" | absolute_url | jsonify }} },
-      "inLanguage": {{ site.lang | jsonify }},
+      "inLanguage": {{ lang | jsonify }},
       {%- if page.date %}
       "datePublished": {{ page.date | date_to_xmlschema | jsonify }},
       {%- endif %}
@@ -268,15 +328,15 @@
       {%- if seo_type == "profile" %}
       "about": { "@id": {{ "/#person" | absolute_url | jsonify }} },
       "mainEntity": { "@id": {{ "/#person" | absolute_url | jsonify }} },
-      {%- elsif page.url == "/" %}
+      {%- elsif page.ref == "home" %}
       "about": { "@id": {{ "/#person" | absolute_url | jsonify }} },
       "mainEntity": {
         "@type": "ItemList",
-        "name": {{ "Writing by " | append: site.author.name | jsonify }},
-        "numberOfItems": {{ site.posts | size }},
+        "name": {{ site.title | jsonify }},
+        "numberOfItems": {{ lang_posts | size }},
         "itemListOrder": "https://schema.org/ItemListOrderDescending",
         "itemListElement": [
-          {%- for post in site.posts -%}
+          {%- for post in lang_posts -%}
           {
             "@type": "ListItem",
             "position": {{ forloop.index }},
@@ -302,9 +362,9 @@
         {
           "@type": "ListItem",
           "position": 1,
-          "name": "Writing",
-          "item": {{ "/" | absolute_url | jsonify }}
-        }{%- if page.url != "/" -%},
+          "name": {{ t.writing_heading | jsonify }},
+          "item": {{ t.home | absolute_url | jsonify }}
+        }{%- if page.ref != "home" -%},
         {
           "@type": "ListItem",
           "position": 2,

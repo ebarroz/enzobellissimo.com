@@ -1,0 +1,16 @@
+{%- comment -%}
+  post-date.html — a long date in the page's language.
+
+    {% include post-date.html date=page.date lang=page.lang %}
+
+  Liquid's `date` filter only speaks English, so the month comes from the
+  string table and `date_long` decides the order ("August 25, 2026" vs
+  "25 de agosto de 2026"). Placeholders use [brackets], not {braces}:
+  Liquid ends an output tag at a lone `}`, which would truncate the tag.
+{%- endcomment -%}
+{%- assign d_t = site.data.i18n[include.lang] | default: site.data.i18n[site.lang] -%}
+{%- assign d_month_index = include.date | date: "%m" | plus: 0 | minus: 1 -%}
+{%- assign d_month = d_t.months[d_month_index] -%}
+{%- assign d_day = include.date | date: "%-d" -%}
+{%- assign d_year = include.date | date: "%Y" -%}
+{{- d_t.date_long | replace: "[month]", d_month | replace: "[day]", d_day | replace: "[year]", d_year -}}

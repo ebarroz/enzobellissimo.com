@@ -1,14 +1,38 @@
 ---
 layout: default
 ---
+{%- include i18n.html -%}
+{%- comment -%}
+  `lang_posts` (from i18n.html, already included by the default layout) holds
+  only this language's posts. Walking it by hand instead of using
+  `page.previous` / `page.next` is what keeps the reader inside one language:
+  Jekyll's built-ins would happily hand a Portuguese reader an English post.
+{%- endcomment -%}
+{%- assign nav_index = nil -%}
+{%- for sibling in lang_posts -%}
+  {%- if sibling.url == page.url -%}{%- assign nav_index = forloop.index0 -%}{%- endif -%}
+{%- endfor -%}
+{%- assign nav_newer = nil -%}
+{%- assign nav_older = nil -%}
+{%- if nav_index -%}
+  {%- assign nav_last = lang_posts.size | minus: 1 -%}
+  {%- if nav_index > 0 -%}
+    {%- assign i = nav_index | minus: 1 -%}
+    {%- assign nav_newer = lang_posts[i] -%}
+  {%- endif -%}
+  {%- if nav_index < nav_last -%}
+    {%- assign i = nav_index | plus: 1 -%}
+    {%- assign nav_older = lang_posts[i] -%}
+  {%- endif -%}
+{%- endif -%}
 <article class="post">
   <header class="post-header">
     <p class="eyebrow mono">
-      <a href="{{ '/' | relative_url }}">← writing</a>
+      <a href="{{ t.home | relative_url }}">← {{ t.back_writing }}</a>
       <span class="sep">/</span>
-      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%B %-d, %Y" }}</time>
+      <time datetime="{{ page.date | date_to_xmlschema }}">{% include post-date.html date=page.date lang=lang %}</time>
       <span class="sep">/</span>
-      {% assign words = page.content | strip_html | number_of_words %}{{ words | divided_by: 210 | plus: 1 }} min read
+      {% assign words = page.content | strip_html | number_of_words %}{{ words | divided_by: 210 | plus: 1 }} {{ t.min_read }}
     </p>
     <h1 class="post-title-main">{{ page.title }}</h1>
     {% if page.subtitle %}<p class="post-subtitle">{{ page.subtitle }}</p>{% endif %}
@@ -18,7 +42,7 @@ layout: default
   </div>
 
   {%- if page.tags and page.tags != empty %}
-  <p class="post-tags mono" aria-label="Topics">
+  <p class="post-tags mono" aria-label="{{ t.topics }}">
     {%- for tag in page.tags %}<span class="tag">{{ tag }}</span>{% endfor -%}
   </p>
   {%- endif %}
@@ -28,30 +52,30 @@ layout: default
       <img class="brand-mark" src="{{ '/assets/logo.svg' | relative_url }}" alt="" width="20" height="20">
       <span>
         <strong>{{ site.author.name }}</strong><br>
-        <span class="dim">{{ site.author.job_title }} · {{ site.location }}</span><br>
+        <span class="dim">{{ t.job_title }} · {{ t.location }}</span><br>
         <span class="sig-links">
           {%- for profile in site.social_profiles %}<a href="{{ profile.url }}" rel="me noopener" target="_blank">{{ profile.name }}</a>{% unless forloop.last %} <span class="dim">·</span> {% endunless %}{% endfor -%}
         </span>
       </span>
     </div>
-    <p class="mono"><a href="{{ '/' | relative_url }}">← All writing</a></p>
+    <p class="mono"><a href="{{ t.home | relative_url }}">← {{ t.all_writing }}</a></p>
   </footer>
 
   {%- comment -%} Internal links: keeps crawlers moving through the archive. {%- endcomment -%}
-  {%- if page.previous or page.next %}
-  <nav class="post-nav" aria-label="More essays">
-    <p class="post-nav-label mono dim">Keep reading</p>
+  {%- if nav_newer or nav_older %}
+  <nav class="post-nav" aria-label="{{ t.more_essays }}">
+    <p class="post-nav-label mono dim">{{ t.keep_reading }}</p>
     <div class="post-nav-grid">
-      {%- if page.next %}
-      <a class="post-nav-item prev" href="{{ page.next.url | relative_url }}" rel="prev">
-        <span class="post-nav-dir mono"><span class="post-nav-arrow">&#8592;</span> Newer</span>
-        <span class="post-nav-title">{{ page.next.title }}</span>
+      {%- if nav_newer %}
+      <a class="post-nav-item prev" href="{{ nav_newer.url | relative_url }}" rel="prev">
+        <span class="post-nav-dir mono"><span class="post-nav-arrow">&#8592;</span> {{ t.newer }}</span>
+        <span class="post-nav-title">{{ nav_newer.title }}</span>
       </a>
       {%- endif %}
-      {%- if page.previous %}
-      <a class="post-nav-item next" href="{{ page.previous.url | relative_url }}" rel="next">
-        <span class="post-nav-dir mono">Older <span class="post-nav-arrow">&#8594;</span></span>
-        <span class="post-nav-title">{{ page.previous.title }}</span>
+      {%- if nav_older %}
+      <a class="post-nav-item next" href="{{ nav_older.url | relative_url }}" rel="next">
+        <span class="post-nav-dir mono">{{ t.older }} <span class="post-nav-arrow">&#8594;</span></span>
+        <span class="post-nav-title">{{ nav_older.title }}</span>
       </a>
       {%- endif %}
     </div>

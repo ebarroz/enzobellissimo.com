@@ -1,0 +1,27 @@
+{%- comment -%}
+  ===========================================================================
+  i18n.html — resolve the current language once, then hand the rest of the
+  render four variables. Include it at the top of any layout or page that
+  renders human-readable text.
+
+    lang        the language tag: "en" | "pt-BR"
+                (also <html lang> and hreflang — deliberately one string)
+    t           the string table for that language, from _data/i18n.yml
+    all_docs    every page + post in every language, for `ref` lookups
+    lang_posts  this language's posts, newest first
+
+  Liquid `assign`s leak out of an include into the calling scope, which is
+  what makes this work as a prelude rather than a wrapper.
+  ===========================================================================
+{%- endcomment -%}
+{%- assign lang = page.lang | default: site.lang -%}
+{%- assign t = site.data.i18n[lang] -%}
+{%- assign all_docs = site.pages | concat: site.posts | concat: site.pt_posts -%}
+{%- comment -%}
+  Which bucket holds this language's posts is data (`collection` in
+  i18n.yml), not an if/else — so a third language needs no template edit.
+  `site.posts` is already newest-first but a collection is not, so both are
+  sorted explicitly: ordering must not depend on where a language happens
+  to live.
+{%- endcomment -%}
+{%- assign lang_posts = site[t.collection] | sort: "date" | reverse -%}

@@ -1,5 +1,6 @@
 ---
 layout: post
+ref: hello-world
 title: Hello, world
 date: 2026-08-18 13:26:42 -0300
 description: >-

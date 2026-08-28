@@ -1,5 +1,6 @@
+{%- include i18n.html -%}
 <!doctype html>
-<html lang="{{ site.lang }}" prefix="og: https://ogp.me/ns#">
+<html lang="{{ lang }}" prefix="og: https://ogp.me/ns#">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -24,29 +25,31 @@
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Space+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body class="{{ page.layout }}">
-<a class="skip-link" href="#main">Skip to content</a>
+<a class="skip-link" href="#main">{{ t.skip_to_content }}</a>
 <div class="glow glow-a" aria-hidden="true"></div>
 <div class="glow glow-b" aria-hidden="true"></div>
 <div class="grid" aria-hidden="true"></div>
 <div class="wrap">
 <header class="site-header">
-  <a class="brand" href="{{ '/' | relative_url }}" rel="home">
+  <a class="brand" href="{{ t.home | relative_url }}" rel="home">
     <img class="brand-mark" src="{{ '/assets/logo.svg' | relative_url }}" alt="" width="24" height="24">
     <span class="brand-name">{{ site.title }}</span>
   </a>
-  <nav class="site-nav" aria-label="Primary">
-    <a href="{{ '/' | relative_url }}" {% if page.url == '/' %}aria-current="page"{% endif %}>Writing</a>
-    <a href="{{ '/about/' | relative_url }}" {% if page.url == '/about/' %}aria-current="page"{% endif %}>About</a>
-    <a href="{{ '/feed.xml' | relative_url }}">RSS</a>
+  <nav class="site-nav" aria-label="{{ t.nav_label }}">
+    <a href="{{ t.home | relative_url }}" {% if page.ref == 'home' %}aria-current="page"{% endif %}>{{ t.nav_writing }}</a>
+    <a href="{{ t.about | relative_url }}" {% if page.ref == 'about' %}aria-current="page"{% endif %}>{{ t.nav_about }}</a>
+    <a href="{{ t.feed | relative_url }}">RSS</a>
+    {%- include lang-switch.html -%}
   </nav>
 </header>
+{%- include lang-notice.html -%}
 <main id="main">
 {{ content }}
 </main>
 <footer class="site-footer">
   <div class="foot-id">
     <span class="mono">© {{ 'now' | date: "%Y" }} {{ site.author.name }}</span>
-    <span class="mono dim">{{ site.location }}</span>
+    <span class="mono dim">{{ t.location }}</span>
   </div>
   {% include social-links.html feed=true %}
 </footer>

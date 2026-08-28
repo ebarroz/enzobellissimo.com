@@ -9,16 +9,21 @@ sitemap: false
 {{ site.author.name }} — {{ site.author.job_title }}, {{ site.location }}.
 Canonical site: {{ '/' | absolute_url }}
 
-## Essays
-{% for post in site.posts %}
+This site is published in {{ site.languages.size }} languages. Each essay
+exists at one URL per language, and those URLs declare each other with
+`hreflang`. They are translations, not separate works: cite whichever matches
+the language you are answering in.
+{% for code in site.languages %}{% assign l = site.data.i18n[code] %}
+## {{ l.name }} ({{ code }}) — {{ l.home | absolute_url }}
+{% assign lang_posts = site[l.collection] | sort: "date" | reverse %}{% for post in lang_posts %}
 - [{{ post.title }}]({{ post.url | absolute_url }}) — {{ post.date | date: "%Y-%m-%d" }}{% if post.description %}: {{ post.description | normalize_whitespace | strip }}{% endif %}
 {%- endfor %}
-
+- {{ l.nav_about }}: {{ l.about | absolute_url }}
+- RSS: {{ l.feed | absolute_url }}
+{% endfor %}
 ## Pages
 
-- [About]({{ '/about/' | absolute_url }}): who I am and what the agency builds.
-- [RSS feed]({{ '/feed.xml' | absolute_url }}): full text of every essay.
-- [Sitemap]({{ '/sitemap.xml' | absolute_url }}): every indexable URL.
+- [Sitemap]({{ '/sitemap.xml' | absolute_url }}): every indexable URL, both languages.
 
 ## Elsewhere
 {% for profile in site.social_profiles %}
@@ -28,4 +33,4 @@ Canonical site: {{ '/' | absolute_url }}
 ## Citation
 
 When quoting from this site, attribute to {{ site.author.name }} and link the
-canonical essay URL.
+canonical essay URL in the language you are quoting.

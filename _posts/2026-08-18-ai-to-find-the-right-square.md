@@ -1,5 +1,6 @@
 ---
 layout: post
+ref: right-square
 title: AI to Find the Right Square
 date: 2026-08-18 13:54:02 -0300
 subtitle: Stop asking AI to solve your problem. Ask it whether you picked the right problem.

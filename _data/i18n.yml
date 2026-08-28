@@ -1,0 +1,130 @@
+# ---------------------------------------------------------------------------
+# _data/i18n.yml — every string the chrome renders, per language.
+#
+# The top-level key is the language tag from `site.languages`, which is also
+# `page.lang`, `<html lang>` and `hreflang`. One lookup drives the whole page:
+#
+#     {%- include i18n.html -%}      →  sets `lang`, `t`, `all_docs`, `lang_posts`
+#     {{ t.nav_writing }}
+#
+# Rule of thumb: if a human-readable word appears in a layout, it belongs
+# here, not there. That is what keeps a third language cheap.
+# ---------------------------------------------------------------------------
+
+en:
+  # ---- identity ----------------------------------------------------------
+  name: English            # endonym, used in link titles
+  short: EN                # the switcher chip
+  locale: en_US            # og:locale
+  collection: posts        # which bucket in `site` holds this language's posts
+  og_image: /assets/og-default.png   # fallback card; it carries the headline
+  home: /
+  about: /about/
+  feed: /feed.xml
+  switch_title: Read this page in English
+
+  # ---- per-language site copy (overrides the flat keys in _config.yml) ----
+  headline: Essays on AI, Automation & Voice Agents
+  tagline: A quiet place to read about AI, automation, and the craft of building an agency.
+  description: >-
+    Essays and notes by Enzo Barros Bellissimo on AI, automation, and voice
+    agents — building systems that qualify leads and book meetings while you sleep.
+  location: São Paulo, Brazil
+  job_title: Founder, Similar Info — custom software & AI agents
+
+  # ---- chrome ------------------------------------------------------------
+  skip_to_content: Skip to content
+  nav_label: Primary
+  nav_writing: Writing
+  nav_about: About
+  lang_label: Language
+  read_in_lang: Read in English
+  elsewhere: Elsewhere
+
+  # ---- home --------------------------------------------------------------
+  now_working: now working
+  writing_heading: Writing
+  essay_one: essay
+  essay_many: essays
+
+  # ---- post --------------------------------------------------------------
+  back_writing: writing
+  back_home: home
+  min_read: min read
+  topics: Topics
+  all_writing: All writing
+  keep_reading: Keep reading
+  more_essays: More essays
+  newer: Newer
+  older: Older
+
+  # ---- 404 ---------------------------------------------------------------
+  notfound_eyebrow: 404 · signal lost
+  notfound_title: Nothing here.
+  notfound_body: The page you're looking for doesn't exist.
+  notfound_link: Back to the reading room
+
+  # ---- dates -------------------------------------------------------------
+  # `date_long` is a template so a language can reorder the parts instead of
+  # forcing a second code path into the layout.
+  date_long: "[month] [day], [year]"
+  months: [January, February, March, April, May, June,
+           July, August, September, October, November, December]
+
+pt-BR:
+  # ---- identity ----------------------------------------------------------
+  name: Português
+  short: PT
+  locale: pt_BR
+  collection: pt_posts
+  og_image: /assets/og-default-pt.png
+  home: /pt/
+  about: /pt/sobre/
+  feed: /pt/feed.xml
+  switch_title: Leia esta página em português
+
+  # ---- per-language site copy --------------------------------------------
+  headline: Ensaios sobre IA, Automação e Voz
+  tagline: Um lugar tranquilo para ler sobre IA, automação e o ofício de construir uma agência.
+  description: >-
+    Ensaios e notas de Enzo Barros Bellissimo sobre IA, automação e agentes de
+    voz — sistemas que qualificam leads e marcam reuniões enquanto você dorme.
+  location: São Paulo, Brasil
+  job_title: Fundador da Similar Info — software sob medida e agentes de IA
+
+  # ---- chrome ------------------------------------------------------------
+  skip_to_content: Pular para o conteúdo
+  nav_label: Principal
+  nav_writing: Textos
+  nav_about: Sobre
+  lang_label: Idioma
+  read_in_lang: Leia em português
+  elsewhere: Em outros lugares
+
+  # ---- home --------------------------------------------------------------
+  now_working: trabalhando agora
+  writing_heading: Textos
+  essay_one: ensaio
+  essay_many: ensaios
+
+  # ---- post --------------------------------------------------------------
+  back_writing: textos
+  back_home: início
+  min_read: min de leitura
+  topics: Temas
+  all_writing: Todos os textos
+  keep_reading: Continue lendo
+  more_essays: Mais ensaios
+  newer: Mais recente
+  older: Mais antigo
+
+  # ---- 404 ---------------------------------------------------------------
+  notfound_eyebrow: 404 · sinal perdido
+  notfound_title: Não há nada aqui.
+  notfound_body: A página que você procura não existe.
+  notfound_link: Voltar para a sala de leitura
+
+  # ---- dates -------------------------------------------------------------
+  date_long: "[day] de [month] de [year]"
+  months: [janeiro, fevereiro, março, abril, maio, junho,
+           julho, agosto, setembro, outubro, novembro, dezembro]

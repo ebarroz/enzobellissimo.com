@@ -1,0 +1,33 @@
+{%- comment -%}
+  ===========================================================================
+  lang-switch.html — the language control in the header.
+
+  Rendered as a segmented pill with a globe, not as two more nav links: the
+  first version sat bare next to "RSS" and read as navigation, which is
+  exactly the thing a language control must not do. The current language is
+  filled, so state is visible without reading the labels.
+
+  Each option links to the *same page* in the other language, resolved
+  through the `ref` key shared by a translation pair. With no counterpart it
+  falls back to that language's home — a missing translation is never a dead
+  end.
+
+  Requires the variables set by i18n.html.
+  ===========================================================================
+{%- endcomment -%}
+<span class="lang-switch" role="group" aria-label="{{ t.lang_label }}">
+  <svg class="lang-globe" viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="1.4" d="M8 1.2a6.8 6.8 0 1 0 0 13.6A6.8 6.8 0 0 0 8 1.2Zm0 0c-2 2-3 4.3-3 6.8s1 4.8 3 6.8m0-13.6c2 2 3 4.3 3 6.8s-1 4.8-3 6.8M1.4 8h13.2"/></svg>
+  {%- for code in site.languages -%}
+  {%- assign l = site.data.i18n[code] -%}
+  {%- if code == lang -%}
+  <span class="lang-opt is-current" lang="{{ code }}" aria-current="true"><span class="sr-only">{{ l.name }} — </span>{{ l.short }}</span>
+  {%- else -%}
+  {%- assign target = l.home -%}
+  {%- if page.ref -%}
+  {%- assign twin = all_docs | where: "ref", page.ref | where: "lang", code | first -%}
+  {%- if twin -%}{%- assign target = twin.url -%}{%- endif -%}
+  {%- endif -%}
+  <a class="lang-opt" href="{{ target | relative_url }}" lang="{{ code }}" hreflang="{{ code }}" title="{{ l.switch_title }}" aria-label="{{ l.switch_title }}">{{ l.short }}</a>
+  {%- endif -%}
+  {%- endfor -%}
+</span>

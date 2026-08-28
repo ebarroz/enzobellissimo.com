@@ -1,0 +1,41 @@
+---
+layout: default
+---
+{%- include i18n.html -%}
+{%- comment -%}
+  The home page for *any* language. `index.html` and `pt/index.html` are
+  front matter and nothing else, so the two can never drift apart: adding a
+  language means adding a stub, not copying markup.
+{%- endcomment -%}
+<section class="hero">
+  <p class="eyebrow mono"><span class="pulse" aria-hidden="true"></span> {{ t.now_working }} · {{ t.location }}</p>
+  <h1 class="hero-title">{{ site.author.name }}</h1>
+  <p class="hero-tagline">{{ t.tagline }}</p>
+  <p class="hero-links">
+    {%- for profile in site.social_profiles %}
+    <a href="{{ profile.url }}" rel="me noopener" target="_blank">{{ profile.name }}<span class="dim"> /{{ profile.handle }}</span></a>
+    {%- endfor %}
+  </p>
+</section>
+
+<section class="writing" aria-labelledby="writing-heading">
+  <div class="section-head">
+    <h2 class="mono" id="writing-heading">{{ t.writing_heading }}</h2>
+    <span class="mono dim">{{ lang_posts | size }} {% if lang_posts.size == 1 %}{{ t.essay_one }}{% else %}{{ t.essay_many }}{% endif %}</span>
+  </div>
+  <ol class="post-list" reversed>
+  {% for post in lang_posts %}
+    <li class="post-item">
+      <a class="post-link" href="{{ post.url | relative_url }}">
+        <time class="post-date mono" datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y" }}<em>.</em>{{ post.date | date: "%m.%d" }}</time>
+        <span class="post-body">
+          <span class="post-title">{{ post.title }}</span>
+          {% assign blurb = post.description | default: post.excerpt %}
+          {% if blurb %}<span class="post-excerpt">{{ blurb | strip_html | normalize_whitespace | truncatewords: 26 }}</span>{% endif %}
+        </span>
+        <span class="post-arrow" aria-hidden="true">→</span>
+      </a>
+    </li>
+  {% endfor %}
+  </ol>
+</section>
