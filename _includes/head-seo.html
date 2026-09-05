@@ -31,6 +31,9 @@
 {%- assign sep = site.title_separator | default: "·" -%}
 {%- if page.ref == "home" -%}
   {%- assign seo_title = site.title | append: " — " | append: t.headline -%}
+{%- elsif page.seo_title -%}
+  {%- comment -%} Explicit <title> for long headlines that would blow the 65-char budget with the site-name suffix. {%- endcomment -%}
+  {%- assign seo_title = page.seo_title -%}
 {%- elsif page.title -%}
   {%- assign seo_title = page.title | append: " " | append: sep | append: " " | append: site.title -%}
 {%- else -%}

@@ -40,7 +40,7 @@ def lang_of(rel):
     return DEFAULT_LANG
 
 pages = sorted(glob.glob(f"{ROOT}/**/*.html", recursive=True))
-check(len(pages) == 11, f"11 HTML pages built (got {len(pages)})")
+check(len(pages) == 13, f"13 HTML pages built (got {len(pages)})")
 # Both languages actually produced pages — a broken collection would other-
 # wise pass every per-page check below by simply having nothing to check.
 for code, prefix in LANGS.items():
@@ -169,10 +169,10 @@ for f in pages:
 sm = ET.parse(f"{ROOT}/sitemap.xml").getroot()
 ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 locs = [l.text for l in sm.findall(".//s:loc", ns)]
-check(len(locs) == 10, f"sitemap: 10 URLs (got {len(locs)})")
+check(len(locs) == 12, f"sitemap: 12 URLs (got {len(locs)})")
 for code, prefix in LANGS.items():
     n = sum(1 for l in locs if lang_of(l[len(SITE):].lstrip("/")) == code)
-    check(n == 5, f"sitemap: 5 URLs for {code} (got {n})")
+    check(n == 6, f"sitemap: 6 URLs for {code} (got {n})")
 check(all(l.startswith(SITE) for l in locs), "sitemap: all URLs absolute")
 check(not any("404" in l for l in locs), "sitemap: 404 excluded")
 check(len(locs) == len(set(locs)), "sitemap: no duplicate URLs")
@@ -191,7 +191,7 @@ for code, path in FEEDS.items():
     check(os.path.exists(f"{ROOT}/{path}"), f"feed: {path} exists")
     feed = ET.parse(f"{ROOT}/{path}").getroot()   # also asserts well-formedness
     entries = feed.findall(f"{atom}entry")
-    check(len(entries) == 3, f"{path}: 3 entries (got {len(entries)})")
+    check(len(entries) == 4, f"{path}: 4 entries (got {len(entries)})")
     # Atom requires all of these at feed level; readers degrade badly without them.
     for tag in ("title", "id", "updated", "author", "subtitle"):
         check(feed.find(f"{atom}{tag}") is not None, f"{path}: feed has <{tag}>")

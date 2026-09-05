@@ -59,6 +59,7 @@ Everything below is optional, but the first two are worth 30 seconds each:
 | `image` | The 1200×630 social card. Generate it with the script below. Falls back to `/assets/og-default.png`. |
 | `image_alt` | Alt text for that card. |
 | `subtitle` | Renders under the title; also a good place for the long-tail phrasing. |
+| `seo_title` | Replaces the `<title>` tag verbatim (no site-name suffix). Use it when `title · Enzo Barros Bellissimo` would exceed 65 characters; the `<h1>` and social cards keep using `title`. |
 | `tags: [a, b]` | Rendered as chips, emitted as `article:tag` + schema `keywords`. |
 | `category` | Schema `articleSection`. Defaults to `Essays`. |
 | `last_modified_at` | Sets `dateModified`. Add it when you meaningfully revise an old post — freshness is a ranking input. |
